@@ -13,7 +13,7 @@ CREATE OR REPLACE PACKAGE laberinto AS
 --Halla el camino de a la salida. No camino if null. 
   FUNCTION hallar_camino (
     coordenada_inicio   IN columna,
-    matriz               IN fila
+    matriz              IN fila
   ) RETURN fila;
 
 /* --private
@@ -55,7 +55,7 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
   BEGIN
     nueva_coordenada(y_index) := coordenada(y_index) - 1;
     nueva_coordenada(x_index) := coordenada(x_index);
-    return nueva_coordenada;
+    RETURN nueva_coordenada;
   END norte;
 
   FUNCTION sur (
@@ -65,7 +65,7 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
   BEGIN
     nueva_coordenada(y_index) := coordenada(y_index) + 1;
     nueva_coordenada(x_index) := coordenada(x_index);
-    return nueva_coordenada;
+    RETURN nueva_coordenada;
   END sur;
 
   FUNCTION este (
@@ -75,7 +75,7 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
   BEGIN
     nueva_coordenada(y_index) := coordenada(y_index);
     nueva_coordenada(x_index) := coordenada(x_index + 1);
-    return nueva_coordenada;
+    RETURN nueva_coordenada;
   END este;
 
   FUNCTION oeste (
@@ -85,7 +85,7 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
   BEGIN
     nueva_coordenada(y_index) := coordenada(y_index);
     nueva_coordenada(x_index) := coordenada(x_index) - 1;
-    return nueva_coordenada;
+    RETURN nueva_coordenada;
   END oeste;
 
   FUNCTION camino_recursivo (
@@ -107,34 +107,34 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
     END IF;
   --3.	if (x,y no es abierto) return false 
 
-    IF ( matriz(coordenada(y_index))(coordenada(x_index) ) = 0 ) THEN
+    IF ( matriz(coordenada(y_index) ) (coordenada(x_index) ) = 0 ) THEN
       RETURN camino;
     END IF;
-    
+
     camino := camino_recursivo(norte(coordenada),matriz);
-    IF ( camino IS NOT NULL ) THEN
+    IF ( camino.count != 0 ) THEN
       camino(camino.last + 1) := coordenada;
       RETURN camino;
     END IF;
 
     camino := camino_recursivo(este(coordenada),matriz);
-    IF ( camino IS NOT NULL ) THEN
+    IF ( camino.count != 0 ) THEN
       camino(camino.last + 1) := coordenada;
       RETURN camino;
     END IF;
 
     camino := camino_recursivo(sur(coordenada),matriz);
-    IF ( camino IS NOT NULL ) THEN
+    IF ( camino.count != 0 ) THEN
       camino(camino.last + 1) := coordenada;
       RETURN camino;
     END IF;
-  
+
     camino := camino_recursivo(oeste(coordenada),matriz);
-    IF ( camino IS NOT NULL ) THEN
+    IF ( camino.count != 0 ) THEN
       camino(camino.last + 1) := coordenada;
       RETURN camino;
     ELSE
-    --FIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIXFIX
+      camino.DELETE;
       RETURN camino;
     END IF;
 
@@ -147,10 +147,9 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
     matriz              IN fila
   ) RETURN fila AS
   BEGIN
+  --Retorna el camino en reversa
     RETURN camino_recursivo(coordenada_inicio,matriz);
   END hallar_camino;
-  
-  --Retorna el camino en reversa
 
 END laberinto;
 /
