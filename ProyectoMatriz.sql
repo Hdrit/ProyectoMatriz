@@ -1,19 +1,24 @@
+--Definicion del tipo matriz
+/*create or replace type coordenate AS TABLE OF NUMBER;
+/
+create or replace type matrix is table of coordenate;
+/*/
 /**
 Especificacion del paquete que maneja el laberinto
 */
 CREATE OR REPLACE PACKAGE laberinto AS
---Definicion del tipo matriz
-  TYPE coordenate IS
-    TABLE OF NUMBER(1) INDEX BY BINARY_INTEGER;
-  TYPE matrix IS
-    TABLE OF coordenate INDEX BY BINARY_INTEGER;
+
 --Constantes de coordenadas
   y_index NUMBER := 1;
   x_index NUMBER := 2;
---Halla el camino de a la salida. No camino if null. 
+  
+--Variable global matrix
+  matriz matrix;
+  
+--Halla el camino de a la salida. No camino if empty. 
   FUNCTION hallar_camino (
-    coordenada_inicio   IN coordenate,
-    matriz              IN matrix
+    x in number,
+    y in number
   ) RETURN matrix;
 
 /* --private
@@ -28,17 +33,6 @@ Revisa la matriz
 END laberinto;
 /
 
-/**
-Test package
-*/
-
-
-/**
-Adapter package.
-OCI es incapaz de enviar colecciones tipo TABLE, por lo que la informacion para ruby
-debe convertirse en un CLOB de formato JSON. 
-*/
-
 --Zona de cuerpos
 
 /**
@@ -46,7 +40,11 @@ Cuerpo del paquete laberinto.
 */
 
 CREATE OR REPLACE PACKAGE BODY laberinto AS
-  --Funcion privada norte, sur, este y oeste
+/**
+Definiciones privadas
+*/
+
+--Definicion de las funciones norte, sur, este y oeste
 
   FUNCTION norte (
     coordenada IN coordenate
@@ -88,9 +86,9 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
     RETURN nueva_coordenada;
   END oeste;
 
+--Definición de la funcion recursiva
   FUNCTION camino_recursivo (
-    coordenada   IN coordenate,
-    matriz       IN matrix
+    coordenada   IN coordenate
   ) RETURN matrix AS
     camino   matrix;
   BEGIN
@@ -111,25 +109,25 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
       RETURN camino;
     END IF;
 
-    camino := camino_recursivo(norte(coordenada),matriz);
+    camino := camino_recursivo(norte(coordenada));
     IF ( camino.count != 0 ) THEN
       camino(camino.last + 1) := coordenada;
       RETURN camino;
     END IF;
 
-    camino := camino_recursivo(este(coordenada),matriz);
+    camino := camino_recursivo(este(coordenada));
     IF ( camino.count != 0 ) THEN
       camino(camino.last + 1) := coordenada;
       RETURN camino;
     END IF;
 
-    camino := camino_recursivo(sur(coordenada),matriz);
+    camino := camino_recursivo(sur(coordenada));
     IF ( camino.count != 0 ) THEN
       camino(camino.last + 1) := coordenada;
       RETURN camino;
     END IF;
 
-    camino := camino_recursivo(oeste(coordenada),matriz);
+    camino := camino_recursivo(oeste(coordenada));
     IF ( camino.count != 0 ) THEN
       camino(camino.last + 1) := coordenada;
       RETURN camino;
@@ -140,18 +138,23 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
 
   END camino_recursivo;
 
-  --declaracion de la funcion Hallar_camino
+/**
+Definiciones públicas
+*/
 
+  --declaracion de la funcion Hallar_camino
   FUNCTION hallar_camino (
-    coordenada_inicio   IN coordenate,
-    matriz              IN matrix
+    x in number,
+    y in number
   ) RETURN matrix AS
+    coordenada_inicio coordenate := coordenate();
   BEGIN
-  --Retorna el camino en reversa
-    RETURN camino_recursivo(coordenada_inicio,matriz);
+    coordenada_inicio(x_index) := x;
+    coordenada_inicio(y_index) := y;
+  --Retorna el camino en reversa. FIXMEFIXME    
+    RETURN camino_recursivo(coordenada_inicio);
   END hallar_camino;
 
 END laberinto;
 /
-
 SHOW ERRORS;
