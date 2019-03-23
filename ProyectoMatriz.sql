@@ -21,6 +21,19 @@ CREATE OR REPLACE PACKAGE laberinto AS
     y in number
   ) RETURN matrix;
 
+/*
+FUNCTION generar_matriz(
+n in number,
+xf in number,
+yf in number
+) return matrix;
+*/
+
+/*
+PROCEDURE set_matriz(
+nueva_matriz matrix
+);
+*/
 /* --private
 Revisa la matriz
 1) Solo haya una salida.
@@ -28,6 +41,7 @@ Revisa la matriz
 3) La entrada debe estar en 1.
 4) La salida esté en alguno de los bordes.
 
+PROCEUDRE revisar_matriz();
 */
 
 END laberinto;
