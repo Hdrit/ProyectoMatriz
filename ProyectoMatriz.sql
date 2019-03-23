@@ -100,7 +100,7 @@ Definiciones privadas
     RETURN nueva_coordenada;
   END oeste;
 
---Definición de la funcion recursiva
+--Definición de la funcion recursiva. NOTA: ESTA FUNCION DESTRUYE LA MATRIZ PINTANDOLA DE 2.
   FUNCTION camino_recursivo (
     coordenada   IN coordenate
   ) RETURN matrix AS
@@ -123,38 +123,39 @@ Definiciones privadas
     END IF;
   --3.	if (x,y no es abierto) return false 
 
-    IF ( matriz(coordenada(y_index) ) (coordenada(x_index) ) = 0 ) THEN
+    IF ( matriz(coordenada(y_index) ) (coordenada(x_index) ) = 0
+    OR matriz(coordenada(y_index) ) (coordenada(x_index) ) = 2) THEN
       RETURN camino;
     END IF;
+    matriz(coordenada(y_index) ) (coordenada(x_index) ) := 2;
     camino := camino_recursivo(norte(coordenada));
-    IF ( camino.count != 0 ) THEN
-      dbms_output.put_line('norte...');
+    IF ( camino.count > 0 ) THEN
       camino.extend;
       camino(camino.last) := coordenada;
       RETURN camino;
     END IF;    
+    
     camino := camino_recursivo(este(coordenada));
-    IF ( camino.count != 0 ) THEN
-      dbms_output.put_line('este...');
+    IF ( camino.count > 0 ) THEN
       camino.extend;
       camino(camino.last) := coordenada;
       RETURN camino;
     END IF;    
+    
     camino := camino_recursivo(sur(coordenada));
-    IF ( camino.count != 0 ) THEN
-      dbms_output.put_line('sur...');
+    IF ( camino.count > 0 ) THEN
       camino.extend;
       camino(camino.last) := coordenada;
       RETURN camino;
-    END IF;    
+    END IF;
     camino := camino_recursivo(oeste(coordenada));
-    IF ( camino.count != 0 ) THEN
-      dbms_output.put_line('oeste...');
+    IF ( camino.count > 0 ) THEN
       camino.extend;
       camino(camino.last) := coordenada;
       RETURN camino;
     ELSE
       camino.DELETE;
+      matriz(coordenada(y_index) ) (coordenada(x_index) ) := 1;
       RETURN camino;
     END IF;
 

@@ -40,10 +40,10 @@ CREATE OR REPLACE PACKAGE BODY testlab AS
 
 
   FUNCTION matriz_estatica RETURN matrix AS
-    m matrix := matrix(coordenate(1,1,1,1,1), 
-                coordenate(1,1,1,1,1),
-                coordenate(1,1,1,1,1),
-                coordenate(1,1,1,1,1),
+    m matrix := matrix(coordenate(1,0,1,0,1), 
+                coordenate(1,0,1,0,1),
+                coordenate(1,0,1,1,1),
+                coordenate(1,0,1,1,1),
                 coordenate(1,1,1,1,5));
   BEGIN    
     return m;
@@ -53,8 +53,8 @@ CREATE OR REPLACE PACKAGE BODY testlab AS
   BEGIN
     --Cambiar por cargar matriz
     laberinto.matriz := testlab.matriz_estatica;
-    --testlab.imprimir_matriz(laberinto.matriz);
     testlab.imprimir_matriz(laberinto.hallar_camino(1,1));
+    testlab.imprimir_matriz(laberinto.matriz);
   END CORRER_TEST;
 END testlab;
 /
