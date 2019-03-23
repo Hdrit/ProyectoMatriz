@@ -1,35 +1,48 @@
 /**
 Test package
 */
-CREATE OR REPLACE PACKAGE TESTLAB AS
-  PROCEDURE IMPRIMIR_MATRIZ(
-    MATRIZ matrix
+CREATE OR REPLACE PACKAGE testlab AS
+  PROCEDURE imprimir_matriz (
+    matriz matrix
   );
 
+  FUNCTION matriz_estatica RETURN matrix;
 
-END TESTLAB;
+END testlab;
 /
 
 --Declaración paquete pruebas
-CREATE OR REPLACE PACKAGE BODY TESTLAB AS
-  PROCEDURE IMPRIMIR_MATRIZ(
-    MATRIZ matrix
+
+CREATE OR REPLACE PACKAGE BODY testlab AS
+
+  PROCEDURE imprimir_matriz (
+    matriz matrix
   ) AS
-  index_m number;
-  index_c number;
-  linea varchar(50);
+    index_m   NUMBER;
+    index_c   NUMBER;
+    linea     VARCHAR(50);
   BEGIN
-  index_m := matriz.first;
-  while(index_m is not null) loop
-    index_c := matriz(index_m).first;
-    while(index_c is not null) loop
-      linea := linea||' '||matriz(index_m)(index_c); 
-      index_c := matriz(index_m).next(index_c);
-    end loop;
-    dbms_output.put_line(linea);
-    linea := ' ';
-    index_m := matriz.next(index_m);
-  end loop;
-  END IMPRIMIR_MATRIZ;
-END TESTLAB;
+    index_m := matriz.first;
+    WHILE ( index_m IS NOT NULL ) LOOP
+      index_c := matriz(index_m).first;
+      WHILE ( index_c IS NOT NULL ) LOOP
+        linea := linea||matriz(index_m)(index_c)|| ' ';
+        index_c := matriz(index_m).next(index_c);
+      END LOOP;
+
+      dbms_output.put_line(linea);
+      linea := '';
+      index_m := matriz.next(index_m);
+    END LOOP;
+
+  END imprimir_matriz;
+
+
+  FUNCTION matriz_estatica RETURN matrix AS
+    m matrix := matrix(coordenate(1,2), coordenate(1,2));
+  BEGIN    
+    return m;
+  END matriz_estatica;
+
+END testlab;
 /
