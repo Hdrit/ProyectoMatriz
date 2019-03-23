@@ -1,4 +1,5 @@
 set serveroutput on;
 BEGIN
-  testlab.imprimir_matriz(testlab.matriz_estatica);
+  laberinto.matriz := testlab.matriz_estatica;
+  testlab.imprimir_matriz(laberinto.hallar_camino(1,1));
 END;

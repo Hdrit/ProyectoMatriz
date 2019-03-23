@@ -108,7 +108,7 @@ Definiciones privadas
   BEGIN
   --1.	if (x,y fuera del laberinto) return false 
     IF ( coordenada(y_index) <= 0 OR coordenada(x_index) <= 0 OR coordenada(y_index) > matriz.count OR coordenada(x_index) > matriz
-    (coordenada(y_index) ).count ) THEN
+    (coordenada(y_index)).count ) THEN
       RETURN camino;
     END IF;
   --2.	if (x,y es estado final) return true

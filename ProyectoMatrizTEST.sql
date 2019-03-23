@@ -39,7 +39,11 @@ CREATE OR REPLACE PACKAGE BODY testlab AS
 
 
   FUNCTION matriz_estatica RETURN matrix AS
-    m matrix := matrix(coordenate(1,2), coordenate(1,2));
+    m matrix := matrix(coordenate(1,1,1,1,1), 
+                coordenate(1,1,1,1,1),
+                coordenate(1,1,1,1,1),
+                coordenate(1,1,1,1,1),
+                coordenate(1,1,1,1,5));
   BEGIN    
     return m;
   END matriz_estatica;
