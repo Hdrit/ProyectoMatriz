@@ -7,7 +7,8 @@ CREATE OR REPLACE PACKAGE testlab AS
   );
 
   FUNCTION matriz_estatica RETURN matrix;
-
+  
+  PROCEDURE correr_test;
 END testlab;
 /
 
@@ -47,6 +48,13 @@ CREATE OR REPLACE PACKAGE BODY testlab AS
   BEGIN    
     return m;
   END matriz_estatica;
-
+  
+  PROCEDURE CORRER_TEST AS
+  BEGIN
+    --Cambiar por cargar matriz
+    laberinto.matriz := testlab.matriz_estatica;
+    testlab.imprimir_matriz(laberinto.matriz);
+    testlab.imprimir_matriz(laberinto.hallar_camino(1,1));
+  END CORRER_TEST;
 END testlab;
 /

@@ -107,8 +107,11 @@ Definiciones privadas
     camino   matrix;
   BEGIN
   --1.	if (x,y fuera del laberinto) return false 
-    IF ( coordenada(y_index) <= 0 OR coordenada(x_index) <= 0 OR coordenada(y_index) > matriz.count OR coordenada(x_index) > matriz
-    (coordenada(y_index)).count ) THEN
+    IF ( coordenada(y_index) <= 0 
+    OR coordenada(x_index) <= 0 
+    OR coordenada(y_index) > matriz.count 
+    OR coordenada(x_index) > matriz.count )
+    THEN
       RETURN camino;
     END IF;
   --2.	if (x,y es estado final) return true
@@ -161,7 +164,7 @@ Definiciones públicas
     x in number,
     y in number
   ) RETURN matrix AS
-    coordenada_inicio coordenate := coordenate();
+    coordenada_inicio coordenate := coordenate(0,0);
   BEGIN
     coordenada_inicio(x_index) := x;
     coordenada_inicio(y_index) := y;
