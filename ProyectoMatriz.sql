@@ -63,7 +63,7 @@ Definiciones privadas
   FUNCTION norte (
     coordenada IN coordenate
   ) RETURN coordenate AS
-    nueva_coordenada   coordenate;
+    nueva_coordenada   coordenate := coordenate(0,0);
   BEGIN
     nueva_coordenada(y_index) := coordenada(y_index) - 1;
     nueva_coordenada(x_index) := coordenada(x_index);
@@ -73,7 +73,7 @@ Definiciones privadas
   FUNCTION sur (
     coordenada IN coordenate
   ) RETURN coordenate AS
-    nueva_coordenada   coordenate;
+    nueva_coordenada   coordenate := coordenate(0,0);
   BEGIN
     nueva_coordenada(y_index) := coordenada(y_index) + 1;
     nueva_coordenada(x_index) := coordenada(x_index);
@@ -83,17 +83,17 @@ Definiciones privadas
   FUNCTION este (
     coordenada IN coordenate
   ) RETURN coordenate AS
-    nueva_coordenada   coordenate;
+    nueva_coordenada   coordenate := coordenate(0,0);
   BEGIN
     nueva_coordenada(y_index) := coordenada(y_index);
-    nueva_coordenada(x_index) := coordenada(x_index + 1);
+    nueva_coordenada(x_index) := coordenada(x_index) + 1;
     RETURN nueva_coordenada;
   END este;
 
   FUNCTION oeste (
     coordenada IN coordenate
   ) RETURN coordenate AS
-    nueva_coordenada   coordenate;
+    nueva_coordenada   coordenate := coordenate(0,0);
   BEGIN
     nueva_coordenada(y_index) := coordenada(y_index);
     nueva_coordenada(x_index) := coordenada(x_index) - 1;
@@ -104,7 +104,7 @@ Definiciones privadas
   FUNCTION camino_recursivo (
     coordenada   IN coordenate
   ) RETURN matrix AS
-    camino   matrix;
+    camino   matrix := matrix();
   BEGIN
   --1.	if (x,y fuera del laberinto) return false 
     IF ( coordenada(y_index) <= 0 
@@ -117,6 +117,7 @@ Definiciones privadas
   --2.	if (x,y es estado final) return true
 
     IF ( matriz(coordenada(y_index) ) (coordenada(x_index) ) = 5 ) THEN
+      camino.extend;
       camino(1) := coordenada;
       RETURN camino;
     END IF;
@@ -125,28 +126,32 @@ Definiciones privadas
     IF ( matriz(coordenada(y_index) ) (coordenada(x_index) ) = 0 ) THEN
       RETURN camino;
     END IF;
-
     camino := camino_recursivo(norte(coordenada));
     IF ( camino.count != 0 ) THEN
-      camino(camino.last + 1) := coordenada;
+      dbms_output.put_line('norte...');
+      camino.extend;
+      camino(camino.last) := coordenada;
       RETURN camino;
-    END IF;
-
+    END IF;    
     camino := camino_recursivo(este(coordenada));
     IF ( camino.count != 0 ) THEN
-      camino(camino.last + 1) := coordenada;
+      dbms_output.put_line('este...');
+      camino.extend;
+      camino(camino.last) := coordenada;
       RETURN camino;
-    END IF;
-
+    END IF;    
     camino := camino_recursivo(sur(coordenada));
     IF ( camino.count != 0 ) THEN
-      camino(camino.last + 1) := coordenada;
+      dbms_output.put_line('sur...');
+      camino.extend;
+      camino(camino.last) := coordenada;
       RETURN camino;
-    END IF;
-
+    END IF;    
     camino := camino_recursivo(oeste(coordenada));
     IF ( camino.count != 0 ) THEN
-      camino(camino.last + 1) := coordenada;
+      dbms_output.put_line('oeste...');
+      camino.extend;
+      camino(camino.last) := coordenada;
       RETURN camino;
     ELSE
       camino.DELETE;
