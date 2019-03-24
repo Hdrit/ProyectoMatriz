@@ -12,13 +12,15 @@ CREATE OR REPLACE PACKAGE laberinto AS
   y_index NUMBER := 1;
   x_index NUMBER := 2;
   
+--Tiempo de ejecucion
+  ejecucion NUMBER;
 --Variable global matrix
   matriz matrix;
   
 --Halla el camino de a la salida. No camino if empty. 
   FUNCTION hallar_camino (
-    x in number,
-    y in number
+    x   IN NUMBER,
+    y   IN NUMBER
   ) RETURN matrix;
 
 /*
@@ -29,20 +31,9 @@ yf in number
 ) return matrix;
 */
 
-/*
-PROCEDURE set_matriz(
-nueva_matriz matrix
-);
-*/
-/* --private
-Revisa la matriz
-1) Solo haya una salida.
-) La matriz debe ser NxN.
-3) La entrada debe estar en 1.
-4) La salida esté en alguno de los bordes.
-
-PROCEUDRE revisar_matriz();
-*/
+  PROCEDURE set_matriz (
+    nueva_matriz matrix
+  );
 
 END laberinto;
 /
@@ -57,6 +48,61 @@ CREATE OR REPLACE PACKAGE BODY laberinto AS
 /**
 Definiciones privadas
 */
+--Variable de conteo de tiempo
+
+  timestart   TIMESTAMP;
+  
+  --Funcion privada empezar. Inicializa el conteo del tiempo
+
+  PROCEDURE empezar AS
+  BEGIN
+    timestart := systimestamp;
+  END empezar;
+  
+  --Funcion privada terminar. Muestra el tiempo transcurrido entre la ultima llamada a empezar.
+
+  PROCEDURE terminar AS
+    timeend      TIMESTAMP;
+    timesecond   NUMBER;
+  BEGIN
+    timeend := systimestamp;
+    timesecond := ( ( extract ( HOUR FROM timeend ) * 3600 ) + ( extract ( MINUTE FROM timeend ) * 60 ) + extract ( SECOND FROM timeend
+    ) ) - ( ( extract ( HOUR FROM timestart ) * 3600 ) + ( extract ( MINUTE FROM timestart ) * 60 ) + extract ( SECOND FROM timestart
+    ) );
+
+    ejecucion := timesecond;
+  END terminar;
+  
+  /* --private
+Revisa la matriz
+1) Solo haya una salida.
+) La matriz debe ser NxN.
+4) La salida esté en alguno de los bordes.
+*/
+
+  PROCEDURE revisar_matriz AS
+  BEGIN
+    IF ( matriz IS NULL OR matriz.count = 0 OR matriz.count != matriz(1).count ) THEN
+      raise_application_error(-20002,'Matriz con dimensiones inválidas');
+    END IF;
+  END revisar_matriz;
+  
+--Invierte un camino
+  FUNCTION ordenar (
+    matriz_al_revez matrix
+  ) RETURN MATRIX AS
+    index_m1 number;
+    matriz_ordenada matrix := matrix();
+  BEGIN
+    index_m1 := matriz_al_revez.last;
+    WHILE ( index_m1 IS NOT NULL ) LOOP
+      matriz_ordenada.extend;
+      matriz_ordenada(matriz_ordenada.last) := matriz_al_revez(index_m1);
+      index_m1 := matriz_al_revez.prior(index_m1);
+    END LOOP;
+    return matriz_ordenada;
+  END ORDENAR;
+
 
 --Definicion de las funciones norte, sur, este y oeste
 
@@ -101,17 +147,15 @@ Definiciones privadas
   END oeste;
 
 --Definición de la funcion recursiva. NOTA: ESTA FUNCION DESTRUYE LA MATRIZ PINTANDOLA DE 2.
+
   FUNCTION camino_recursivo (
-    coordenada   IN coordenate
+    coordenada IN coordenate
   ) RETURN matrix AS
-    camino   matrix := matrix();
+    camino   matrix := matrix ();
   BEGIN
   --1.	if (x,y fuera del laberinto) return false 
-    IF ( coordenada(y_index) <= 0 
-    OR coordenada(x_index) <= 0 
-    OR coordenada(y_index) > matriz.count 
-    OR coordenada(x_index) > matriz.count )
-    THEN
+    IF ( coordenada(y_index) <= 0 OR coordenada(x_index) <= 0 OR coordenada(y_index) > matriz.count OR coordenada(x_index) > matriz
+    .count ) THEN
       RETURN camino;
     END IF;
   --2.	if (x,y es estado final) return true
@@ -123,32 +167,33 @@ Definiciones privadas
     END IF;
   --3.	if (x,y no es abierto) return false 
 
-    IF ( matriz(coordenada(y_index) ) (coordenada(x_index) ) = 0
-    OR matriz(coordenada(y_index) ) (coordenada(x_index) ) = 2) THEN
+    IF ( matriz(coordenada(y_index) ) (coordenada(x_index) ) = 0 OR matriz(coordenada(y_index) ) (coordenada(x_index) ) = 2 ) THEN
       RETURN camino;
     END IF;
+
     matriz(coordenada(y_index) ) (coordenada(x_index) ) := 2;
-    camino := camino_recursivo(norte(coordenada));
-    IF ( camino.count > 0 ) THEN
-      camino.extend;
-      camino(camino.last) := coordenada;
-      RETURN camino;
-    END IF;    
-    
-    camino := camino_recursivo(este(coordenada));
-    IF ( camino.count > 0 ) THEN
-      camino.extend;
-      camino(camino.last) := coordenada;
-      RETURN camino;
-    END IF;    
-    
-    camino := camino_recursivo(sur(coordenada));
+    camino := camino_recursivo(norte(coordenada) );
     IF ( camino.count > 0 ) THEN
       camino.extend;
       camino(camino.last) := coordenada;
       RETURN camino;
     END IF;
-    camino := camino_recursivo(oeste(coordenada));
+
+    camino := camino_recursivo(este(coordenada) );
+    IF ( camino.count > 0 ) THEN
+      camino.extend;
+      camino(camino.last) := coordenada;
+      RETURN camino;
+    END IF;
+
+    camino := camino_recursivo(sur(coordenada) );
+    IF ( camino.count > 0 ) THEN
+      camino.extend;
+      camino(camino.last) := coordenada;
+      RETURN camino;
+    END IF;
+
+    camino := camino_recursivo(oeste(coordenada) );
     IF ( camino.count > 0 ) THEN
       camino.extend;
       camino(camino.last) := coordenada;
@@ -166,18 +211,43 @@ Definiciones públicas
 */
 
   --declaracion de la funcion Hallar_camino
+  --La entrada debe estar en 1.
+
   FUNCTION hallar_camino (
-    x in number,
-    y in number
+    x   IN NUMBER,
+    y   IN NUMBER
   ) RETURN matrix AS
-    coordenada_inicio coordenate := coordenate(0,0);
+    coordenada_inicio   coordenate := coordenate(0,0);
+    camino_al_revez matrix;
+    camino_ordenado     matrix;
   BEGIN
+    IF ( matriz(y) (x) != 1 ) THEN
+      raise_application_error(-20001,'Coordenadas iniciales inválidas');
+    END IF;
+
+    empezar;
     coordenada_inicio(x_index) := x;
-    coordenada_inicio(y_index) := y;
-  --Retorna el camino en reversa. FIXMEFIXME    
-    RETURN camino_recursivo(coordenada_inicio);
+    coordenada_inicio(y_index) := y;  
+    camino_al_revez := camino_recursivo(coordenada_inicio);
+    IF (camino_al_revez is null or camino_al_revez.count = 0) then
+      raise_application_error(-20002,'No fue posible solucionar laberinto');
+    end if;
+    camino_ordenado := ordenar(camino_al_revez);
+    terminar;
+    RETURN camino_ordenado;
   END hallar_camino;
+  
+  --declaracion de la funcion set_matriz
+
+  PROCEDURE set_matriz (
+    nueva_matriz matrix
+  ) AS
+  BEGIN
+    matriz := nueva_matriz;
+    revisar_matriz;
+  END set_matriz;
 
 END laberinto;
 /
+
 SHOW ERRORS;
