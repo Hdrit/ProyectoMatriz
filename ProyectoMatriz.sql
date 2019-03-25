@@ -73,6 +73,29 @@ Definiciones privadas
     ejecucion := timesecond;
   END terminar;
   
+  FUNCTION ubicar_salida 
+  RETURN COORDENATE as
+    salida coordenate;
+    index_m number;
+    index_c number;
+  BEGIN
+    index_m := matriz.first;
+    while(index_m is not null) loop
+      index_c := matriz(index_m).first;
+      while(index_c is not null) loop
+        IF(matriz(index_m)(index_c) = 5) then
+          if(salida is not null) then
+            raise_application_error(-20003,'Multiples salidas encontradas');
+          end if;
+          salida := coordenate(index_m, index_c );
+        end if;
+        index_c := matriz(index_m).next(index_c);
+      end loop;
+      index_m := matriz.next(index_m);
+    end loop;
+    RETURN SALIDA;
+  END UBICAR_SALIDA;
+  
   /* --private
 Revisa la matriz
 1) Solo haya una salida.
@@ -81,11 +104,22 @@ Revisa la matriz
 */
 
   PROCEDURE revisar_matriz AS
+  salida coordenate;
   BEGIN
     IF ( matriz IS NULL OR matriz.count = 0 OR matriz.count != matriz(1).count ) THEN
-      raise_application_error(-20002,'Matriz con dimensiones inválidas');
+      raise_application_error(-20004,'Matriz con dimensiones inválidas');
     END IF;
+    salida := ubicar_salida;
+    IF (salida IS NULL) THEN
+      raise_application_error(-20005,'Matriz carece de salida');
+    ELSIF (salida(x_index) != 1 
+      AND salida(y_index) != 1
+      AND salida(x_index) != matriz.count
+      AND salida(y_index) != matriz.count) THEN
+      raise_application_error(-20006, 'La salida debe estar en uno de los bordes');
+    END IF;    
   END revisar_matriz;
+
   
 --Invierte un camino
   FUNCTION ordenar (

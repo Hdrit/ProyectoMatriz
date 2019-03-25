@@ -51,12 +51,11 @@ CREATE OR REPLACE PACKAGE BODY testlab AS
   
   PROCEDURE CORRER_TEST AS
   BEGIN
-    --Cambiar por cargar matriz
-    laberinto.matriz := testlab.matriz_estatica;
+    laberinto.set_matriz(testlab.matriz_estatica);
     testlab.imprimir_matriz(laberinto.matriz);
     testlab.imprimir_matriz(laberinto.hallar_camino(1,1));
     testlab.imprimir_matriz(laberinto.matriz);
-    dbms_output.put_line('Tiempo en secs'||laberinto.ejecucion);
+    dbms_output.put_line('Tiempo en secs '||laberinto.ejecucion);
   END CORRER_TEST;
 END testlab;
 /
