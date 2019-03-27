@@ -1,0 +1,23 @@
+--- !ruby/object:VR_ENV
+vr_yaml_file: C:/Users/Admin/visualruby/Matriz/.vr_settings.yaml
+width: 1350
+height: 705
+panel_pos: 360
+notebook_panel_position: 400
+run_command_line: ruby main.rb
+open_files:
+- C:/Users/Admin/visualruby/Matriz/src/VentanaLaberinto.rb
+open_folders:
+- C:/Users/Admin/visualruby/Matriz
+- C:/Users/Admin/visualruby/Matriz/src
+- C:/Users/Admin/visualruby/Matriz/src/glade
+current_file: C:/Users/Admin/visualruby/Matriz/src/VentanaLaberinto.rb
+current_line: 129
+rdoc_command_line: rdoc -x README
+browser: firefox
+backup_path: "/home/eric"
+tab_spaces: 2
+glade_path: glade-3
+font_name: Monospace 10
+builder: !ruby/object:Gtk::Builder {}
+top_level_window: false
