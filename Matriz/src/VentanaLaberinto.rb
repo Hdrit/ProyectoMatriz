@@ -8,23 +8,55 @@ class VentanaLaberinto
     @pared = "src/rsc/pared.png"
     @recorrido = "src/rsc/recorrido.png"
     @camino = "src/rsc/camino.png"
-    @salida = ""    
+    @salida = "src/rsc/salida.png"    
+    #@inicio = "src/rsc/inicio.png"
+    @path = ""
   end  
 
   def button1__clicked(*args)
-    
+    #request
+    #to_file @path
   end
 
   def button3__clicked(*args)
-    cargar_archivo("C:/Users/Admin/Documents/lab.txt")
-    pintar_matriz(matriz)
+    dialog = Gtk::FileChooserDialog.new(:title => nil, :parent => nil, :action => :open, 
+:buttons => nil )
+    dialog.add_button(Gtk::Stock::OPEN, Gtk::ResponseType::ACCEPT)
+    if dialog.run == Gtk::ResponseType::ACCEPT
+      @path = dialog.filename    
+      begin  
+        cargar_archivo(@path)
+        pintar_matriz(matriz)
+      rescue Exception => e
+        dialog.destroy
+        show_errors e.message
+        return
+      end      
+    end
+    dialog.destroy
   end
 
   def button2__clicked(*args)
     xi =  @builder["spinbutton1"].value.to_i
     yi =  @builder["spinbutton4"].value.to_i
-    hallar_camino(xi,yi)
-    @builder["label11"].label = ejecucion.to_s + " segundos" 
+    begin
+      camino = hallar_camino(xi,yi)
+      escribir_camino(camino)
+      @builder["label11"].label = ejecucion.to_s + " segundos" 
+      pintar_matriz(matriz)
+    rescue Exception => e
+      show_errors e.message
+      return
+    end
+  end
+
+  def button4__clicked(*args)
+    begin  
+        cargar_archivo(@path)
+    rescue Exception => e
+        show_errors e.message
+        return
+    end
     pintar_matriz(matriz)
   end
 
@@ -51,8 +83,10 @@ class VentanaLaberinto
     end
     tabla.resize( matriz_i.size, matriz_i.size)
     @builder['spinbutton5'].value= matriz_i.size
+    xi =  @builder["spinbutton1"].value.to_i
+    yi =  @builder["spinbutton4"].value.to_i
     matriz_i.each_with_index do |a, i|
-      a.each_with_index do |v, j|
+      a.each_with_index do |v, j|        
         label = Gtk::Image.new(file: to_ima(v))
         label.set_visible true
         tabla.attach_defaults(label, j, j+1, i, i+1)
@@ -71,6 +105,22 @@ class VentanaLaberinto
     when 5
       @salida
     end
+  end
+
+  def escribir_camino(camino)
+    texto = ""
+    camino.each do |line|
+      texto<<line.reverse.join(",")+"\n"
+    end
+    
+    @builder["textview1"].buffer.text = texto
+  end
+
+  def show_errors(msg)
+    dialog = Gtk::MessageDialog.new(nil, Gtk::DialogFlags::DESTROY_WITH_PARENT, Gtk::MessageType::QUESTION,
+Gtk::ButtonsType::CLOSE, msg)
+    dialog.run
+    dialog.destroy
   end
 
 #
