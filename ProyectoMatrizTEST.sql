@@ -9,6 +9,7 @@ CREATE OR REPLACE PACKAGE testlab AS
   FUNCTION matriz_estatica RETURN matrix;
   
   PROCEDURE correr_test;
+  PROCEDURE GENERADOR_TEST;
 END testlab;
 /
 
@@ -21,7 +22,7 @@ CREATE OR REPLACE PACKAGE BODY testlab AS
   ) AS
     index_m   NUMBER;
     index_c   NUMBER;
-    linea     VARCHAR(50);
+    linea     VARCHAR(200);
   BEGIN
     index_m := matriz.first;
     WHILE ( index_m IS NOT NULL ) LOOP
@@ -57,5 +58,10 @@ CREATE OR REPLACE PACKAGE BODY testlab AS
     testlab.imprimir_matriz(laberinto.matriz);
     dbms_output.put_line('Tiempo en secs '||laberinto.ejecucion);
   END CORRER_TEST;
+  
+  PROCEDURE GENERADOR_TEST AS
+  BEGIN
+    testlab.imprimir_matriz(laberinto.generar_matriz(10,1,1,10,10));
+  END GENERADOR_TEST;
 END testlab;
 /

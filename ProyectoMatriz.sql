@@ -23,13 +23,15 @@ CREATE OR REPLACE PACKAGE laberinto AS
     y   IN NUMBER
   ) RETURN matrix;
 
-/*
-FUNCTION generar_matriz(
-n in number,
-xf in number,
-yf in number
-) return matrix;
-*/
+
+  FUNCTION generar_matriz(
+    n in number,
+    xi in number,
+    yi in number,
+    xf in number,
+    yf in number
+  ) return matrix;
+
 
   PROCEDURE set_matriz (
     nueva_matriz matrix
@@ -51,7 +53,10 @@ Definiciones privadas
 --Variable de conteo de tiempo
 
   timestart   TIMESTAMP;
-  
+
+--copia de la matriz
+  matriz_copia matrix;
+
   --Funcion privada empezar. Inicializa el conteo del tiempo
 
   PROCEDURE empezar AS
@@ -99,8 +104,8 @@ Definiciones privadas
   /* --private
 Revisa la matriz
 1) Solo haya una salida.
-) La matriz debe ser NxN.
-4) La salida esté en alguno de los bordes.
+2) La matriz debe ser NxN.
+3) La salida esté en alguno de los bordes.
 */
 
   PROCEDURE revisar_matriz AS
@@ -240,6 +245,38 @@ Revisa la matriz
 
   END camino_recursivo;
 
+--Genera la base para la construccion de la matriz
+  FUNCTION generar_base(
+    n in number
+  ) return matrix as
+    matriz_generada matrix := matrix();
+    coordenada_base coordenate:= coordenate();
+    index_m   NUMBER;
+    index_c   NUMBER;
+  BEGIN
+    for i in 1..n loop
+      matriz_generada.extend;
+      for j in 1..n loop
+        coordenada_base.extend; 
+        coordenada_base(j) := ROUND(DBMS_RANDOM.VALUE(0, 1));
+      end loop;
+      matriz_generada(i) := coordenada_base;
+    end loop;
+    return matriz_generada;
+  end;
+  
+   FUNCTION generar_camino(
+    matriz_generada in matrix,
+    coordenada_inicial in coordenate,
+    coordenada_final IN coordenate
+  ) return matrix as
+    matriz_camino matrix;
+  begin
+    matriz_camino := matriz_generada;
+    matriz_camino(coordenada_inicial(y_index))(coordenada_inicial(x_index)) := 1;
+    matriz_camino(coordenada_final(y_index))(coordenada_final(x_index)) := 5;
+    return matriz_camino;
+  end;
 /**
 Definiciones públicas
 */
@@ -255,11 +292,11 @@ Definiciones públicas
     camino_al_revez matrix;
     camino_ordenado     matrix;
   BEGIN
+    matriz := matriz_copia;
     IF ( matriz(y) (x) != 1 ) THEN
       raise_application_error(-20001,'Coordenadas iniciales inválidas');
-    END IF;
-
-    empezar;
+    END IF;    
+    empezar;    
     coordenada_inicio(x_index) := x;
     coordenada_inicio(y_index) := y;  
     camino_al_revez := camino_recursivo(coordenada_inicio);
@@ -278,9 +315,45 @@ Definiciones públicas
   ) AS
   BEGIN
     matriz := nueva_matriz;
+    matriz_copia := nueva_matriz;
     revisar_matriz;
   END set_matriz;
-
+  
+  --Funcion generar matriz
+  
+  FUNCTION generar_matriz(
+    n in number,
+    xi in number,
+    yi in number,
+    xf in number,
+    yf in number
+  ) return matrix as
+    matriz_generada matrix:= matrix();
+    coordenada_inicial coordenate := coordenate(0,0);
+    coordenada_final coordenate:= coordenate(0,0);
+  begin
+    IF(xi=xf and yi=yf) THEN
+      raise_application_error(-20007, 'La salida y la entrada deben ser distintos');
+    ELSIF (xf != 1 
+      AND yf != 1
+      AND xf != n
+      AND yf != n) THEN
+      raise_application_error(-20006, 'La salida debe estar en uno de los bordes');
+    ELSIF(xi>n
+      or yi>n
+      or xf>n
+      or yf>n
+    ) THEN
+      raise_application_error(-20008, 'Las coordenadas para la generacion son invalidas');
+    END IF;
+    coordenada_inicial(x_index) := xi;
+    coordenada_inicial(y_index) := yi;
+    coordenada_final(x_index) := xf;
+    coordenada_final(y_index) := yf;
+    
+    matriz_generada := generar_camino(generar_base(n), coordenada_inicial, coordenada_final);
+    return matriz_generada;
+  end;
 END laberinto;
 /
 
