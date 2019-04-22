@@ -291,7 +291,9 @@
                           <object class="GtkLabel" id="label5">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">label</property>
+                            <property name="ypad">1</property>
+                            <property name="label" translatable="yes">Por favor cargue o 
+genere su laberinto</property>
                           </object>
                           <packing>
                             <property name="x_options">GTK_EXPAND | GTK_SHRINK</property>

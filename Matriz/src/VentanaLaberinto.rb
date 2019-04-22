@@ -14,8 +14,18 @@ class VentanaLaberinto
   end  
 
   def button1__clicked(*args)
-    #request
-    #to_file @path
+    xi =  @builder["spinbutton1"].value.to_i
+    yi =  @builder["spinbutton4"].value.to_i
+    xf =  @builder["spinbutton2"].value.to_i
+    yf =  @builder["spinbutton3"].value.to_i
+    size =  @builder["spinbutton5"].value.to_i
+    begin
+      generar_matriz(size, xi, yi, xf, yf)
+      pintar_matriz(matriz)
+    rescue Exception => e
+        show_errors e.message
+        return
+    end
   end
 
   def button3__clicked(*args)
@@ -107,6 +117,21 @@ class VentanaLaberinto
     end
   end
 
+  def generar_matriz_mejorado(size, xi, yi, xf, yf)
+    salir = false
+    generar_matriz(size, xi, yi, xf, yf)
+    while !salir do
+      begin
+        generar_matriz(size, xi, yi, xf, yf)
+        camino = hallar_camino(xi,yi)
+        salir = true
+        refrescar
+      rescue
+        salir = false
+      end
+    end
+  end
+
   def escribir_camino(camino)
     texto = ""
     camino.each do |line|
@@ -156,6 +181,16 @@ Gtk::ButtonsType::CLOSE, msg)
     cursor.exec
     cursor[':in'].to_ary_ary   
   end
+
+  def generar_matriz(size, xi, yi, xf, yf)
+    cursor = @conn.parse('begin laberinto.set_matriz(laberinto.generar_matriz(:size, :xi, :yi, :xf,:yf)); end;')
+    cursor.bind_param(':size', size)
+    cursor.bind_param(':yi', yi)
+    cursor.bind_param(':xi', xi)
+    cursor.bind_param(':yf', yf)
+    cursor.bind_param(':xf', xf)
+    cursor.exec
+  end
   
   #
   # Esta funcion utiliza la matriz estatica del paquete de pruebas
@@ -174,6 +209,11 @@ Gtk::ButtonsType::CLOSE, msg)
       end
     end
     cursor = @conn.parse("declare mat matrix := matrix(#{a.join(',')}); begin laberinto.set_matriz(mat); end;") 
+    cursor.exec
+  end
+
+  def refrescar
+    cursor = @conn.parse('begin laberinto.set_matriz(laberinto.matriz_copia); end;')
     cursor.exec
   end
 end

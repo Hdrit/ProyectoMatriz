@@ -12,7 +12,7 @@ open_folders:
 - C:/Users/Admin/visualruby/Matriz/src
 - C:/Users/Admin/visualruby/Matriz/src/glade
 current_file: C:/Users/Admin/visualruby/Matriz/src/VentanaLaberinto.rb
-current_line: 113
+current_line: 23
 rdoc_command_line: rdoc -x README
 browser: firefox
 backup_path: "/home/eric"

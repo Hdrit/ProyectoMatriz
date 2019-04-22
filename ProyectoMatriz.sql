@@ -16,6 +16,8 @@ CREATE OR REPLACE PACKAGE laberinto AS
   ejecucion NUMBER;
 --Variable global matrix
   matriz matrix;
+--copia de la matriz
+  matriz_copia matrix;
   
 --Halla el camino de a la salida. No camino if empty. 
   FUNCTION hallar_camino (
@@ -54,8 +56,7 @@ Definiciones privadas
 
   timestart   TIMESTAMP;
 
---copia de la matriz
-  matriz_copia matrix;
+
 
   --Funcion privada empezar. Inicializa el conteo del tiempo
 
@@ -256,6 +257,7 @@ Revisa la matriz
   BEGIN
     for i in 1..n loop
       matriz_generada.extend;
+      coordenada_base.delete;
       for j in 1..n loop
         coordenada_base.extend; 
         coordenada_base(j) := ROUND(DBMS_RANDOM.VALUE(0, 1));
